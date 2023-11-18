@@ -51,6 +51,17 @@ from .serializers import TaskSerializer
 class CreateListTasksApiView(generics.ListCreateAPIView):
     queryset = TaskModel.objects.all()
     serializer_class = TaskSerializer
+    
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'tasks':serializer.data})
 
     # def create(self, request, *args, **kwargs):
     #     serializer = self.get_serializer(data=request.data, many=True)
@@ -64,6 +75,7 @@ class CreateListTasksApiView(generics.ListCreateAPIView):
 class TaskDetailApiView(generics.RetrieveAPIView):
     queryset = TaskModel.objects.all()
     serializer_class = TaskSerializer
+    lookup_field = "pk"
 
 
 
